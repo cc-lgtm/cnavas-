@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            background: cadetblue;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+</body>
+<script>
+    var myCanvas = document.getElementById('myCanvas');
+    var ctx = myCanvas.getContext('2d');
+
+    var aw = document.documentElement.clientWidth || document.body.clientWidth;
+    var ah = document.documentElement.clientHeight || document.body.clientHeight;
+
+    myCanvas.width = aw;
+    myCanvas.height = ah;
+
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+
+
+    var ranX = Math.random() * aw;
+    var ranY = Math.random() * ah;
+
+    function Star(ctx, x, y, r) {
+        this.ctx = ctx;
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.speedX = Math.random() * 3 * Math.pow(-1, Math.round(Math.random()));
+        this.speedY = Math.random() * 3 * Math.pow(-1, Math.round(Math.random()));
+
+        Star.prototype.randerStar = function() {
+            this.ctx.beginPath();
+            this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.closePath();
+        };  
+
+        Star.prototype.move = function() {
+            this.x -= this.speedX;
+            this.y -= this.speedY;
+        };
+
+        Star.prototype.clear = function() {
+            this.ctx.clearRect(0, 0, aw, ah);
+        }
+
+        Star.prototype.check = function() {
+            if(this.x <= 0 || this.x >= aw) {
+                this.speedX *= -1;
+            };
+            if(this.y <= 0 || this.y >= ah) {
+                this.speedY *= -1;
+            };
+        };
+    }
+    var star = new Star(ctx, Math.random() * aw, Math.random() * ah, 2);
+
+    var mouseStar = new Star(ctx, 0, 0, 2);
+
+    window.onmousemove = function(e) {
+        var x = e.clientX;
+        var y = e.clientY;
+
+        mouseStar.x = x;
+        mouseStar.y = y;
+    };
+
+    var starArr = [];
+    for(var i = 0; i < 150; i++) {
+        starArr.push(new Star(ctx, Math.random() * aw, Math.random() * ah, 2));
+    };
+
+    setInterval(function() {
+
+        star.clear();
+
+        mouseStar.randerStar();
+
+        starArr.forEach(function(val,idx,arr) {
+
+            val.move();
+
+            val.check();
+
+            val.randerStar();
+        });
+        starArr.forEach(function(val,idx,arr) {
+
+            for(var i = idx + 1; i < starArr.length; i++) {
+                if(Math.abs(val.x - starArr[i].x) < 50 && Math.abs(val.y - starArr[i].y) < 50) {
+                    drawLine(val.x, val.y, starArr[i].x, starArr[i].y);
+                };
+            };
+
+            if(Math.abs(val.x - mouseStar.x) < 150 && Math.abs(val.y - mouseStar.y) < 150) {
+                    drawLine(val.x, val.y, mouseStar.x, mouseStar.y);
+                };
+
+        });
+    }, 60);
+
+    window.onclick = function(e) {
+        var x = e.clientX;
+        var y = e.clientY;
+
+        for(var i = 0; i < 5; i++) {
+            starArr.push(new Star(ctx, x, y, 2));   
+            starArr.shift();
+        };
+    };
+
+    function drawLine(startX, startY, endX, endY) {
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        ctx.closePath();
+    };
+
+    window.onresize = function() {
+        aw = document.documentElement.clientWidth || document.body.clientWidth;
+        ah = document.documentElement.clientHeight || document.body.clientHeight;
+
+        myCanvas.width = aw;
+        myCanvas.height = ah;
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+    };
+</script>
+</html>
